@@ -23,7 +23,7 @@ Este enfoque garantiza un framework **limpio, escalable, reutilizable y fácil d
 
 La siguiente estructura de carpetas asegura una correcta **separación de responsabilidades**:
 
-```plaintext
+```
 rappipay-automation/
 ├── src/
 │   ├── main/java/com/rappipay/
@@ -39,149 +39,142 @@ rappipay-automation/
 │   ├── log4j2.xml          # Configuración de logging
 │   └── config.properties   # Parámetros de plataforma y capacidades
 └── pom.xml                 # Gestión de dependencias con Maven
+```
+---
+## 3. Patrones de Diseño Aplicados
 
-3. Patrones de Diseño Aplicados
-🎭 Screenplay Pattern
+### 🎭 Screenplay Pattern
 
-Los tests se modelan como historias de usuarios, donde:
+Los tests se modelan como **historias de usuarios**, donde:
 
-Un Actor interactúa con la aplicación.
+- Un **Actor** interactúa con la aplicación.
+- El actor ejecuta **Tasks** (ej. `Login`, `Transferencia`).
+- Las tareas están compuestas por **Interactions** reutilizables.
+- Las validaciones se realizan mediante **Questions**.
 
-El actor ejecuta Tasks (ej. Login, Transferencia).
+#### ✅ Beneficios
 
-Las tareas están compuestas por Interactions reutilizables.
+- Alta reutilización de código  
+- Tests más legibles y expresivos  
+- Fácil escalabilidad  
 
-Las validaciones se realizan mediante Questions.
+---
 
-✅ Beneficios:
+### 🧱 Page Object Model (POM)
 
-Alta reutilización de código
+El patrón **POM** se utiliza exclusivamente para la **capa de UI**, centralizando los localizadores de elementos:
 
-Tests más legibles y expresivos
+- Un archivo por pantalla  
+- Cambios en la UI se corrigen en un solo lugar  
+- Reduce el impacto de cambios visuales  
 
-Fácil escalabilidad
-
-🧱 Page Object Model (POM)
-
-El patrón POM se utiliza exclusivamente para la capa de UI, centralizando los localizadores de elementos:
-
-Un archivo por pantalla
-
-Cambios en la UI se corrigen en un solo lugar
-
-Reduce el impacto de cambios visuales
-
-Ejemplo:
-
+**Ejemplo:**
+```
 LoginScreen.java
-
 HomeScreen.java
+```
+### 🏭 Factory Pattern
 
-🏭 Factory Pattern
+Implementado en la capa de **drivers**, permite:
 
-Implementado en la capa de drivers, permite:
+- Inicializar dinámicamente el `AppiumDriver`
+- Soportar **Android** e **iOS** sin duplicar código
+- Selección de plataforma por configuración
 
-Inicializar dinámicamente el AppiumDriver
+---
 
-Soportar Android e iOS sin duplicar código
+## 4. Gestión Multiplataforma
 
-Selección de plataforma por configuración
-4. Gestión Multiplataforma
+La plataforma se define en el archivo `config.properties`:
 
-La plataforma se define en el archivo config.properties:
-
+```properties
 platform=ANDROID
 deviceName=Pixel_5
+```
+El framework carga automáticamente las **DesiredCapabilities** según el valor configurado.
 
+---
 
-El framework carga automáticamente las DesiredCapabilities según el valor configurado.
-
-Localizadores multiplataforma
+### Localizadores multiplataforma
 
 En la capa UI se utilizan las anotaciones nativas de Appium:
 
-@AndroidFindBy
-
-@iOSXCUITFindBy
+- `@AndroidFindBy`
+- `@iOSXCUITFindBy`
 
 Esto permite compartir la misma lógica de negocio entre plataformas.
 
-5. Estrategia de Logs y Reportes
-📝 Logging
+## 5. Estrategia de Logs y Reportes
 
-Se integra Log4j2 / SLF4J para:
+### 📝 Logging
 
-Registrar cada interacción del driver
+Se integra **Log4j2 / SLF4J** para:
 
-Tiempos de espera y carga de elementos
-
-Errores y excepciones
+- Registrar cada interacción del driver  
+- Tiempos de espera y carga de elementos  
+- Errores y excepciones  
 
 Esto facilita el diagnóstico de fallos en ejecución local o CI.
 
-📊 Reportes
+---
+
+### 📊 Reportes
 
 Se propone el uso de:
 
-Allure Reports o
+- **Allure Reports**
+- **ExtentReports**
 
-ExtentReports
+**Características:**
 
-Características:
+- Detalle paso a paso  
+- Capturas automáticas en fallos  
+- Reportes visuales y exportables  
 
-Detalle paso a paso
+## 6. Escalabilidad y Mantenibilidad
+### 🚀 Escalabilidad
 
-Capturas automáticas en fallos
+- Las Tasks son independientes y reutilizables
 
-Reportes visuales y exportables
+- Nuevas funcionalidades se agregan sin afectar tests existentes
 
-6. Escalabilidad y Mantenibilidad
-🚀 Escalabilidad
+- Ideal para suites grandes (Smoke, Regression, E2E)
 
-Las Tasks son independientes y reutilizables
-
-Nuevas funcionalidades se agregan sin afectar tests existentes
-
-Ideal para suites grandes (Smoke, Regression, E2E)
-
-🛠️ Mantenibilidad
+### 🛠️ Mantenibilidad
 
 Separación clara entre:
 
-Qué se prueba (Tests)
+- Qué se prueba → Tests
 
-Cómo se ejecuta (Tasks / Interactions)
+- Cómo se ejecuta → Tasks / Interactions
 
-Dónde está el elemento (UI / POM)
+- Dónde está el elemento → UI / POM
 
-Esto reduce significativamente el costo de mantenimiento ante cambios en la aplicación.
+- Esto reduce significativamente el costo de mantenimiento ante cambios en la aplicación.
 
-7. Organización de Dependencias y Ejecución
-📦 Maven
+## 7. Organización de Dependencias y Ejecución
 
-Todas las dependencias se gestionan desde pom.xml:
+### 📦 Maven
 
-Appium
+Todas las dependencias se gestionan desde `pom.xml`:
 
-TestNG / JUnit
+- Appium  
+- TestNG / JUnit  
+- Log4j2  
+- Reportes  
 
-Log4j2
+---
 
-Reportes
+### ▶️ Ejecución
 
-▶️ Ejecución
+Las pruebas se ejecutan mediante **TestNG XML Suites**, permitiendo:
 
-Las pruebas se ejecutan mediante TestNG XML Suites, permitiendo:
+- Agrupación de pruebas (Smoke, Regression)  
+- Ejecución paralela  
+- Integración sencilla con pipelines CI/CD  
 
-Agrupación de pruebas (Smoke, Regression)
-
-Ejecución paralela
-
-Integración sencilla con pipelines CI/CD
-
-Ejemplo:
-
+**Ejemplo:**
+```
 mvn clean test -DsuiteXmlFile=smoke.xml
-
-
+```
 
